@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Waste Classification</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            text-align: center;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            animation: slideDown 1s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .main-sections {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        #camera-section, #project-description {
+            flex: 1;
+            min-width: 300px;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        #camera-section:hover, #project-description:hover {
+            transform: translateY(-5px);
+        }
+
+        .camera-container {
+            background: linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.1));
+            padding: 20px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #2196F3, #21CBF3);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        #dataset-trigger {
+            margin: 20px auto;
+            display: block;
+        }
+
+        .dataset-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            background: rgba(255, 255, 255, 0.95);
+            margin: 20px auto;
+            width: 90%;
+            max-width: 1200px;
+            border-radius: 20px;
+        }
+
+        .dataset-section.active {
+            max-height: 2000px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .waste-category {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .waste-category:hover {
+            transform: translateY(-5px);
+        }
+
+        .waste-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .waste-image {
+            width: 200px;
+            height: 150px;
+            border-radius: 10px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .waste-image:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .waste-description {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .waste-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .waste-item {
+            background: #e9ecef;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        video, canvas {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background: #000;
+        }
+
+        #classification-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border-radius: 10px;
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-recycle"></i> Hospital Waste Classification System</h1>
+    </header>
+
+    <div class="main-sections">
+        <section id="camera-section">
+            <h2><i class="fas fa-camera"></i> Image Capture</h2>
+            <div class="camera-container">
+                <div class="camera-controls">
+                    <button id="start-camera"><i class="fas fa-video"></i> Start Camera</button>
+                    <button id="capture"><i class="fas fa-camera"></i> Capture</button>
+                </div>
+                <video id="video" autoplay></video>
+                <canvas id="canvas"></canvas>
+                <div id="classification-result">
+                    Classification: <span id="result-text"></span>
+                </div>
+            </div>
+        </section>
+
+        <section id="project-description">
+            <h2><i class="fas fa-info-circle"></i> About the Project</h2>
+            <p>Our advanced hospital waste classification system uses AI-powered image recognition to categorize waste into three main categories, ensuring proper disposal and environmental safety.</p>
+            <img src="pic.webp" alt="Hospital Waste Management" style="width:100%; border-radius:15px; margin-top:20px;">
+        </section>
+    </div>
+
+    <button id="dataset-trigger" onclick="toggleDataset()">
+        <i class="fas fa-database"></i> View Waste Categories
+    </button>
+
+    <section id="dataset-section" class="dataset-section">
+        <div class="waste-category">
+            <h3><i class="fas fa-leaf"></i> Organic Waste</h3>
+            <div class="waste-images">
+                <img src="download (1).jpg" alt="Fresh vegetables and mushrooms" class="waste-image">
+                <img src="download.jpg" alt="Food scraps" class="waste-image">
+                <img src="images.jpg" alt="Biodegradable waste" class="waste-image">
+            </div>
+            <div class="waste-description">
+                <h4>Common Items:</h4>
+                <div class="waste-items">
+                    <span class="waste-item">Fresh vegetables</span>
+                    <span class="waste-item">Mushrooms</span>
+                    <span class="waste-item">Fruit scraps</span>
+                    <span class="waste-item">Food leftovers</span>
+                    <span class="waste-item">Paper napkins</span>
+                    <span class="waste-item">Tea bags</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="waste-category">
+            <h3><i class="fas fa-recycle"></i> Inorganic Recyclable</h3>
+            <div class="waste-images">
+                <img src="images (1).jpg" alt="Plastic containers" class="waste-image">
+                <img src="download (6).jpg" alt="Glass bottles" class="waste-image">
+                <img src="download (4).jpg" alt="Metal cans" class="waste-image">
+            </div>
+            <div class="waste-description">
+                <h4>Common Items:</h4>
+                <div class="waste-items">
+                    <span class="waste-item">Plastic bottles</span>
+                    <span class="waste-item">Glass containers</span>
+                    <span class="waste-item">Aluminum cans</span>
+                    <span class="waste-item">Cardboard boxes</span>
+                    <span class="waste-item">Paper documents</span>
+                    <span class="waste-item">Metal containers</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="waste-category">
+            <h3><i class="fas fa-trash"></i> Inorganic Non-Recyclable</h3>
+            <div class="waste-images">
+                <img src="download (5).jpg" alt="Medical waste" class="waste-image">
+                <img src="download (3).jpg" alt="Plastic wraps" class="waste-image">
+                <img src="dow.jpg" alt="Disposable items" class="waste-image">
+            </div>
+            <div class="waste-description">
+                <h4>Common Items:</h4>
+                <div class="waste-items">
+                    <span class="waste-item">Medical gloves</span>
+                    <span class="waste-item">Disposable masks</span>
+                    <span class="waste-item">Plastic wraps</span>
+                    <span class="waste-item">Contaminated items</span>
+                    <span class="waste-item">Styrofoam</span>
+                    <span class="waste-item">Broken equipment</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Camera functionality
+        const startCameraButton = document.getElementById('start-camera');
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('capture');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const classificationResult = document.getElementById('classification-result');
+        const resultText = document.getElementById('result-text');
+
+        startCameraButton.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (error) {
+                alert('Unable to access camera: ' + error);
+            }
+        });
+
+        captureButton.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            
+            const categories = ["Organic", "Inorganic Recyclable", "Inorganic Non-Recyclable"];
+            const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+            
+            resultText.textContent = randomCategory;
+            classificationResult.style.display = 'block';
+        });
+
+        // Dataset section toggle
+        function toggleDataset() {
+            const datasetSection = document.getElementById('dataset-section');
+            datasetSection.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
+
